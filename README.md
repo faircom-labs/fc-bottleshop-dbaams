@@ -1,4 +1,4 @@
-# playground Project
+# FairCom Bottle Shop Database-as-a-(Micro)Service
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
