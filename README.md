@@ -1,54 +1,90 @@
 # FairCom Bottle Shop Database-as-a-(Micro)Service
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+The FairCom Bottle Shop is a microservice with a GraphQL endpoint. It uses an embedded database, FairCom DB, accessed via a public API rather than SQL. In addition, it consumes messages from an MQTT broker.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+## Prerequisites
 
-## Running the application in dev mode
+The FairCom Bottle Shop microservice requires a local MQTT broker running on port 8080.
 
-You can run your application in dev mode that enables live coding using:
+It has been tested with FairCom Edge. To get started:
+
+1. Download https://www.faircom.com/download-faircomedge
+2. Unzip (extract all)
+3. Run (server/faircom.exe | server/faircom.sh)
+
+Windows
+```shell script
+start server/faircom.exe
+```
+
+Linux
+```shell script
+./server/faircom.sh
+```
+
+## Starting
 
 ```shell script
 ./mvnw compile quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+Open the GraphiQL web UI http://localhost:8090/q/graphql-ui/
 
-## Packaging and running the application
+> **_NOTE:_** The microservice runs on port 8090 rather than 8080 because it requires an MQTT broker running on port 8080.
 
-The application can be packaged using:
+> **_NOTE:_** The data files are stored in the target/data directory. If it is missing, the embedded database schema will be created and sample data loaded.
 
-```shell script
-./mvnw package
+## Validating
+
+Open the GraphiQL web UI http://localhost:8090/q/graphql-ui/
+
+Get all breweries
+
+```gql
+{
+  getBreweries {
+    id
+    name
+    city
+    state
+  }
+}
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory. Be aware that it’s not an _über-jar_ as
-the dependencies are copied into the `target/quarkus-app/lib/` directory.
+Get all beers in coolers
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
+```gql
+{
+  getCoolerBeers {
+    coolerId
+    beerId
+    quantity
+  }
+}
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+Publish an MQTT message
 
-## Creating a native executable
+FairCom Edge has been tested with MQTT X, a desktop application.
 
-You can create a native executable using:
+MQTT X can be downloaded here: https://mqttx.app/
 
-```shell script
-./mvnw package -Pnative
+```json
+{
+  "coolerId": 1,
+  "beerId": 1,
+  "change": "+"
+}
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+Get the beers in coolers (again)
 
-```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
+```gql
+{
+  getCoolerBeers {
+    coolerId
+    beerId
+    quantity
+  }
+}
 ```
-
-You can then execute your native executable with: `./target/playground-1.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
